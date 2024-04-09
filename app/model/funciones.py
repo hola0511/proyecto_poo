@@ -2,6 +2,7 @@ class Jugador:
     def __init__(self, nombre: str, puntos:int):
         self.nombre: str = nombre
         self.puntos: int = puntos
+
     def lanzar_dado(self) -> int:
         pass
 
