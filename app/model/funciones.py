@@ -51,9 +51,11 @@ class Juego:
         # Implementar la lógica para cargar un juego guardado previamente
         pass
 
+
 def preguntar_jugar_nuevo():
     decision = input("¿Quieres empezar un nuevo juego? (si/no): ")
     return decision.lower() == 'si'
+
 
 def main():
     juego = Juego()
@@ -88,6 +90,7 @@ def main():
                     juego = Juego()
                     juego.iniciarjuego()
                     break
+
 
 if __name__ == "__main__":
     main()
