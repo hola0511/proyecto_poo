@@ -52,8 +52,8 @@ class Juego:
         pass
 
 def preguntar_jugar_nuevo():
-    decision = input("¿Quieres empezar un nuevo juego? (s/n): ")
-    return decision.lower() == 's'
+    decision = input("¿Quieres empezar un nuevo juego? (si/no): ")
+    return decision.lower() == 'si'
 
 def main():
     juego = Juego()
