@@ -1,66 +1,93 @@
 import random
 
 
-class JuegoDeDados:
-    def __init__(self):
-        self.puntos_acumulados = 0
-        self.puntos_objetivo = 50
-        self.record = 0
+class Jugador:
+    def __init__(self, nombre: str):
+        self.nombre: str = nombre
+        self.puntos: int = 0
 
-    def tirar_dado(self):
+    def lanzar_dado(self):
         return random.randint(1, 6)
 
-    def jugar_turno(self):
-        dado = self.tirar_dado()
-        if dado == 1:
-            self.puntos_acumulados = 0
-            print("¡Sacaste un 1! Perdiste todos tus puntos acumulados.")
+    def acumular_puntos(self, puntos: str):
+        if puntos == 1:
+            self.puntos = 0
         else:
-            self.puntos_acumulados += dado
-            print(f"Tiraste un {dado}. Puntos acumulados: {self.puntos_acumulados}")
+            self.puntos += puntos
 
-    def jugar_partida(self):
-        while self.puntos_acumulados < self.puntos_objetivo:
-            decision = input("Presiona 't' para tirar el dado o 'f' para finalizar la partida: ")
-            if decision == 't':
-                self.jugar_turno()
-            elif decision == 'f':
-                print("Partida finalizada.")
-                return True
-            else:
-                print("Entrada no válida. Por favor, ingresa 't' o 'f'.")
-        else:
-            print("¡Felicidades! Has alcanzado o superado los 50 puntos. ¡Has ganado la partida!")
-            return True
-
-    def mostrar_record(self):
-        print(f"El récord actual es: {self.record} puntos.")
-
-    def actualizar_record(self):
-        if self.puntos_acumulados > self.record:
-            self.record = self.puntos_acumulados
-            print(f"¡Nuevo récord establecido! {self.record} puntos.")
+    def get_puntos(self):
+        return self.puntos
 
 
-# Función para preguntar al jugador si quiere jugar de nuevo o terminar
+class Juego:
+    def __init__(self):
+        self.jugadores = []
+
+    def iniciarjuego(self):
+        while True:
+            try:
+                num_jugadores = int(input("Ingrese el número de jugadores: "))
+                if num_jugadores > 0:
+                    break
+                else:
+                    print("Por favor ingrese un número válido mayor que 0.")
+            except ValueError:
+                print("Por favor ingrese un número válido mayor que 0.")
+
+        for i in range(num_jugadores):
+            nombre = input(f"Ingrese el nombre del jugador {i+1}: ")
+            self.jugadores.append(Jugador(nombre))
+
+    def terminar_juego(self):
+        print("Juego terminado.")
+        for jugador in self.jugadores:
+            print(f"{jugador.nombre}: {jugador.puntos} puntos.")
+
+    def guardar_juego(self):
+        # Implementar la lógica para guardar el estado del juego
+        pass
+
+    def cargar_juego(self):
+        # Implementar la lógica para cargar un juego guardado previamente
+        pass
+
 def preguntar_jugar_nuevo():
-    decision = input("¿Quieres empezar un nuevo juego? (si/no): ")
-    return decision.lower() == 'si'
+    decision = input("¿Quieres empezar un nuevo juego? (s/n): ")
+    return decision.lower() == 's'
 
-
-# Función principal del juego
 def main():
-    juego = JuegoDeDados()
-    juego.mostrar_record()
+    juego = Juego()
+    juego.iniciarjuego()
 
     while True:
-        if juego.jugar_partida():
-            juego.actualizar_record()
-
-            if not preguntar_jugar_nuevo():
-                print("¡Hasta luego! Gracias por jugar.")
-                break
-
+        for jugador in juego.jugadores:
+            input(f"{jugador.nombre}, presiona Enter para lanzar el dado o 'f' para finalizar el juego.")
+            decision = input("Presiona 'f' para finalizar el juego o Enter para lanzar el dado: ")
+            if decision.lower() == 'f':
+                juego.terminar_juego()
+                if not preguntar_jugar_nuevo():
+                    print("¡Hasta luego! Gracias por jugar.")
+                    return
+                else:
+                    juego = Juego()
+                    juego.iniciarjuego()
+                    break
+            puntos = jugador.lanzar_dado()
+            jugador.acumular_puntos(puntos)
+            if puntos == 1:
+                print(f"{jugador.nombre} sacó un 1. ¡Pierde todos sus puntos!")
+            else:
+                print(f"{jugador.nombre} lanzó un dado y obtuvo {puntos} puntos. Puntos acumulados: {jugador.puntos}")
+            if jugador.puntos >= 50:
+                print(f"{jugador.nombre} ha alcanzado o superado los 50 puntos. ¡Ha ganado!")
+                juego.terminar_juego()
+                if not preguntar_jugar_nuevo():
+                    print("¡Hasta luego! Gracias por jugar.")
+                    return
+                else:
+                    juego = Juego()
+                    juego.iniciarjuego()
+                    break
 
 if __name__ == "__main__":
     main()
