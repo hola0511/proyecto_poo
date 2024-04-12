@@ -23,7 +23,7 @@ class Juego:
     def __init__(self):
         self.jugadores: list = []
 
-    def Juego(self):
+    def iniciarjuego(self):
         while True:
             try:
                 num_jugadores = int(input("Ingrese el número de jugadores: "))
