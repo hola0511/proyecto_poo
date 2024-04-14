@@ -9,7 +9,7 @@ class Jugador:
     def lanzar_dado(self):
         return random.randint(1, 6)
 
-    def acumular_puntos(self, puntos: str):
+    def acumular_puntos(self, puntos: int):
         if puntos == 1:
             self.puntos = 0
         else:
@@ -21,7 +21,7 @@ class Jugador:
 
 class Juego:
     def __init__(self):
-        self.jugadores = []
+        self.jugadores: list = []
 
     def iniciarjuego(self):
         while True:
@@ -44,11 +44,9 @@ class Juego:
             print(f"{jugador.nombre}: {jugador.puntos} puntos.")
 
     def guardar_juego(self):
-        # Implementar la lógica para guardar el estado del juego
         pass
 
     def cargar_juego(self):
-        # Implementar la lógica para cargar un juego guardado previamente
         pass
 
 
