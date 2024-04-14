@@ -29,7 +29,7 @@ class Juego:
                 num_jugadores = int(input("Ingrese el número de jugadores: "))
                 if num_jugadores > 0:
                     break
-                else:
+                else: 
                     print("Por favor ingrese un número válido mayor que 0.")
             except ValueError:
                 print("Por favor ingrese un número válido mayor que 0.")
