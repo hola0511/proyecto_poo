@@ -2,7 +2,6 @@ import random
 import json
 import os
 
-
 class Jugador:
     def __init__(self, nombre: str):
         self.nombre = nombre
@@ -20,7 +19,6 @@ class Jugador:
     def get_puntos(self):
         return self.puntos
 
-
 class Juego:
     def __init__(self):
         self.jugadores = []
@@ -28,6 +26,32 @@ class Juego:
     def iniciar_juego(self, num_jugadores: int, nombres_jugadores: list):
         for nombre in nombres_jugadores:
             self.jugadores.append(Jugador(nombre))
+
+    def turno_jugador(self, jugador: Jugador):
+        puntos = jugador.lanzar_dado()
+        resultado = f"{jugador.nombre} ha lanzado el dado y ha sacado {puntos}"
+        if puntos == 1:
+            jugador.puntos = 0
+            resultado += f"\n{jugador.nombre} pierde todos sus puntos y tiene ahora {jugador.get_puntos()} puntos."
+        else:
+            jugador.acumular_puntos(puntos)
+            resultado += f"\n{jugador.nombre} ahora tiene {jugador.get_puntos()} puntos."
+            if jugador.get_puntos() >= 100:
+                resultado += f"\n{jugador.nombre} ha ganado el juego con {jugador.get_puntos()} puntos!"
+                return resultado, True
+        return resultado, False
+
+    def jugar(self):
+        resultado = []
+        ganador = False
+        while not ganador:
+            for jugador in self.jugadores:
+                turno_resultado, ganador = self.turno_jugador(jugador)
+                resultado.append(turno_resultado)
+                print(turno_resultado)
+                if ganador:
+                    break
+        return resultado
 
     def terminar_juego(self):
         resultados = []
@@ -41,11 +65,9 @@ class Juego:
     def cargar_juego(self):
         pass
 
-
 class JugadorPersonalizado(Jugador):
     def lanzar_dado(self, min_val: int, max_val: int):
         return random.randint(min_val, max_val)
-
 
 class JuegoPersonalizado(Juego):
     def __init__(self):
@@ -55,7 +77,7 @@ class JuegoPersonalizado(Juego):
         self.max_val_dado = 6
         self.mejores_puntuaciones = []
 
-    def iniciar_juego(self, nzum_jugadores: int, nombres_jugadores: list, puntos_ganar: int, min_val_dado: int, max_val_dado: int):
+    def iniciar_juego(self, num_jugadores: int, nombres_jugadores: list, puntos_ganar: int, min_val_dado: int, max_val_dado: int):
         self.puntos_ganar = puntos_ganar
         self.min_val_dado = min_val_dado
         self.max_val_dado = max_val_dado
@@ -138,7 +160,7 @@ class JuegoPersonalizado(Juego):
             {
                 "pregunta": "¿De qué está hecho el Sol?",
                 "opciones": ["a) Hidrógeno y helio", "b) Oxígeno y nitrógeno", "c) Carbono y silicio", "d) Hierro y níquel"],
-                "respuesta": "c"
+                "respuesta": "a"
             },
             {
                 "pregunta": "¿Cuál es el río más largo del mundo?",
@@ -148,12 +170,12 @@ class JuegoPersonalizado(Juego):
             {
                 "pregunta": "¿Quién escribió 'El principito'?",
                 "opciones": ["a) Antoine de Saint-Exupéry", "b) J.K. Rowling", "c) Gabriel García Márquez", "d) William Shakespeare"],
-                "respuesta": "d"
+                "respuesta": "a"
             },
             {
                 "pregunta": "¿Cuál es el elemento químico más abundante en la corteza terrestre?",
                 "opciones": ["a) Oxígeno", "b) Hierro", "c) Carbono", "d) Silicio"],
-                "respuesta": "d"
+                "respuesta": "a"
             },
             {
                 "pregunta": "¿Cuál es la capital de Australia?",
@@ -172,35 +194,31 @@ class JuegoPersonalizado(Juego):
             },
             {
                 "pregunta": "¿Quién fue el primer ser humano en viajar al espacio?",
-                "opciones": ["a) Yuri Gagarin", "b) Neil Armstrong", "c) Buzz Aldrin", "d) Alan Shepard"],
+                "opciones": ["a) Yuri Gagarin", "b) Neil Armstrong", "c) John Glenn", "d) Buzz Aldrin"],
                 "respuesta": "a"
             },
             {
                 "pregunta": "¿Cuál es el océano más grande del mundo?",
                 "opciones": ["a) Atlántico", "b) Índico", "c) Pacífico", "d) Ártico"],
                 "respuesta": "c"
+            },
+            {
+                "pregunta": "¿En qué país se encuentra la Torre Eiffel?",
+                "opciones": ["a) Italia", "b) Francia", "c) España", "d) Alemania"],
+                "respuesta": "b"
+            },
+            {
+                "pregunta": "¿Cuál es el continente más grande del mundo?",
+                "opciones": ["a) África", "b) América", "c) Asia", "d) Europa"],
+                "respuesta": "c"
             }
         ]
-
         pregunta = random.choice(preguntas)
-        opciones = "\n".join(pregunta["opciones"])
-        return f"{pregunta['pregunta']}\n{opciones}", pregunta["respuesta"]
-
-    def jugar(self):
-        resultado = []
-        ganador = False
-        while not ganador:
-            for jugador in self.jugadores:
-                turno_resultado, ganador = self.turno_jugador(jugador)
-                resultado.append(turno_resultado)
-                print(turno_resultado)
-                if ganador:
-                    break
-        return resultado
+        return f"{pregunta['pregunta']}\n" + "\n".join(pregunta['opciones']), pregunta['respuesta']
 
     def guardar_juego(self):
         estado = {
-            'jugadores': [{'nombre': j.nombre, 'puntos': j.puntos} for j in self.jugadores],
+            'jugadores': [{'nombre': jugador.nombre, 'puntos': jugador.puntos} for jugador in self.jugadores],
             'puntos_ganar': self.puntos_ganar,
             'min_val_dado': self.min_val_dado,
             'max_val_dado': self.max_val_dado
@@ -241,7 +259,6 @@ class JuegoPersonalizado(Juego):
         else:
             return "No hay puntuaciones registradas."
 
-
 def mostrar_menu():
     opciones = [
         "1. Juego Clásico",
@@ -252,6 +269,16 @@ def mostrar_menu():
     ]
     return "\n".join(opciones)
 
+def pedir_numero(mensaje, min_val=1):
+    while True:
+        try:
+            valor = int(input(mensaje))
+            if valor < min_val:
+                print(f"El número debe ser mayor o igual a {min_val}.")
+            else:
+                return valor
+        except ValueError:
+            print("Por favor, introduce un número válido.")
 
 def juego_principal():
     resultados = []
@@ -260,17 +287,20 @@ def juego_principal():
         print(menu)
         opcion = input("Selecciona una opción: ")
         if opcion == '1':
-            num_jugadores = int(input("Introduce el número de jugadores: "))
+            num_jugadores = pedir_numero("Introduce el número de jugadores: ")
             nombres_jugadores = [input(f"Introduce el nombre del jugador {i + 1}: ") for i in range(num_jugadores)]
             juego = Juego()
             juego.iniciar_juego(num_jugadores, nombres_jugadores)
-            print("Juego Clásico no implementado.")
+            resultados.extend(juego.jugar())
+            print("Resultados finales:")
+            for nombre, puntos in juego.terminar_juego():
+                print(f"{nombre}: {puntos} puntos")
         elif opcion == '2':
-            num_jugadores = int(input("Introduce el número de jugadores: "))
+            num_jugadores = pedir_numero("Introduce el número de jugadores: ")
             nombres_jugadores = [input(f"Introduce el nombre del jugador {i + 1}: ") for i in range(num_jugadores)]
-            puntos_ganar = int(input("Introduce el puntaje que se debe alcanzar para ganar (25-100): "))
-            min_val_dado = int(input("Introduce el valor mínimo del dado (1-3): "))
-            max_val_dado = int(input("Introduce el valor máximo del dado (4-25): "))
+            puntos_ganar = pedir_numero("Introduce el puntaje que se debe alcanzar para ganar (25-100): ", 25)
+            min_val_dado = pedir_numero("Introduce el valor mínimo del dado (1-3): ", 1)
+            max_val_dado = pedir_numero("Introduce el valor máximo del dado (4-25): ", 4)
             juego = JuegoPersonalizado()
             juego.iniciar_juego(num_jugadores, nombres_jugadores, puntos_ganar, min_val_dado, max_val_dado)
             resultados.extend(juego.jugar())
@@ -295,5 +325,3 @@ def juego_principal():
 
 if __name__ == "__main__":
     juego_principal()
-
-
