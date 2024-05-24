@@ -7,7 +7,7 @@ class Jugador:
         self.puntos = 0
 
 
-class JuegoDeDados:
+class Juego:
     def __init__(self):
         self.jugadores = []
         self.rondas = 0

@@ -1,5 +1,5 @@
 import pygame
-from app.model.funciones import JuegoDeDados
+from app.model.funciones import Juego
 
 pygame.init()
 
@@ -317,7 +317,7 @@ def cerrar_programa():
 
 
 def main_menu():
-    juego = JuegoDeDados()
+    juego = Juego()
 
     while True:
         for evento in pygame.event.get():
