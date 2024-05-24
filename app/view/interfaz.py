@@ -313,7 +313,7 @@ def mostrar_resultado(mensaje):
 
 def cerrar_programa():
     pygame.quit()
-    # Eliminamos sys.exit() y simplemente cerramos Pygame.
+  
 
 
 def main_menu():
