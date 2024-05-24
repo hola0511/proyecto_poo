@@ -1,5 +1,4 @@
 import pygame
-import sys
 from app.model.funciones import JuegoDeDados
 
 pygame.init()
@@ -13,8 +12,10 @@ AZUL = (0, 0, 255)
 ANCHO_PANTALLA = 800
 ALTO_PANTALLA = 600
 
+
 FUENTE = pygame.font.SysFont("Arial", 24)
 FUENTE_TITULO = pygame.font.SysFont("Arial", 36)
+
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 pygame.display.set_caption("Juego de Dados")
@@ -312,7 +313,7 @@ def mostrar_resultado(mensaje):
 
 def cerrar_programa():
     pygame.quit()
-    sys.exit()
+    # Eliminamos sys.exit() y simplemente cerramos Pygame.
 
 
 def main_menu():

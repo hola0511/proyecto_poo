@@ -163,7 +163,7 @@ class JuegoDeDados:
             if dado == 1:
                 if min_valor_dado != 1 or max_valor_dado != 6:
                     pregunta = self.hacer_pregunta()
-                    return (pregunta, jugador)
+                    return pregunta, jugador
                 else:
                     jugador.puntos = 0
             else:
