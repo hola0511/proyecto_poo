@@ -1,327 +1,173 @@
 import random
-import json
-import os
+
 
 class Jugador:
-    def __init__(self, nombre: str):
+    def __init__(self, nombre):
         self.nombre = nombre
         self.puntos = 0
 
-    def lanzar_dado(self):
-        return random.randint(1, 6)
 
-    def acumular_puntos(self, puntos: int):
-        if puntos == 1:
-            self.puntos = 0
-        else:
-            self.puntos += puntos
-
-    def get_puntos(self):
-        return self.puntos
-
-class Juego:
+class JuegoDeDados:
     def __init__(self):
         self.jugadores = []
+        self.rondas = 0
 
-    def iniciar_juego(self, num_jugadores: int, nombres_jugadores: list):
-        for nombre in nombres_jugadores:
-            self.jugadores.append(Jugador(nombre))
+    def agregar_jugador(self, nombre):
+        self.jugadores.append(Jugador(nombre))
 
-    def turno_jugador(self, jugador: Jugador):
-        puntos = jugador.lanzar_dado()
-        resultado = f"{jugador.nombre} ha lanzado el dado y ha sacado {puntos}"
-        if puntos == 1:
-            jugador.puntos = 0
-            resultado += f"\n{jugador.nombre} pierde todos sus puntos y tiene ahora {jugador.get_puntos()} puntos."
-        else:
-            jugador.acumular_puntos(puntos)
-            resultado += f"\n{jugador.nombre} ahora tiene {jugador.get_puntos()} puntos."
-            if jugador.get_puntos() >= 100:
-                resultado += f"\n{jugador.nombre} ha ganado el juego con {jugador.get_puntos()} puntos!"
-                return resultado, True
-        return resultado, False
-
-    def jugar(self):
-        resultado = []
-        ganador = False
-        while not ganador:
+    def guardar_juego(self, archivo):
+        with open(archivo, 'w') as f:
             for jugador in self.jugadores:
-                turno_resultado, ganador = self.turno_jugador(jugador)
-                resultado.append(turno_resultado)
-                print(turno_resultado)
-                if ganador:
-                    break
-        return resultado
+                f.write(f"{jugador.nombre},{jugador.puntos}\n")
+            f.write(f"{self.rondas}\n")
 
-    def terminar_juego(self):
-        resultados = []
-        for jugador in self.jugadores:
-            resultados.append((jugador.nombre, jugador.puntos))
-        return resultados
+    def cargar_juego(self, archivo):
+        self.jugadores = []
+        with open(archivo, 'r') as f:
+            for line in f:
+                if ',' in line:
+                    nombre, puntos = line.strip().split(',')
+                    nuevo_jugador = Jugador(nombre)
+                    nuevo_jugador.puntos = int(puntos)
+                    self.jugadores.append(nuevo_jugador)
+                else:
+                    self.rondas = int(line.strip())
 
-    def guardar_juego(self):
-        pass
+    def lanzar_dado(self, min_valor=1, max_valor=6):
+        return random.randint(min_valor, max_valor)
 
-    def cargar_juego(self):
-        pass
-
-class JugadorPersonalizado(Jugador):
-    def lanzar_dado(self, min_val: int, max_val: int):
-        return random.randint(min_val, max_val)
-
-class JuegoPersonalizado(Juego):
-    def __init__(self):
-        super().__init__()
-        self.puntos_ganar = 100
-        self.min_val_dado = 1
-        self.max_val_dado = 6
-        self.mejores_puntuaciones = []
-
-    def iniciar_juego(self, num_jugadores: int, nombres_jugadores: list, puntos_ganar: int, min_val_dado: int, max_val_dado: int):
-        self.puntos_ganar = puntos_ganar
-        self.min_val_dado = min_val_dado
-        self.max_val_dado = max_val_dado
-        for nombre in nombres_jugadores:
-            self.jugadores.append(JugadorPersonalizado(nombre))
-
-    def turno_jugador(self, jugador: JugadorPersonalizado):
-        puntos = jugador.lanzar_dado(self.min_val_dado, self.max_val_dado)
-        resultado = f"{jugador.nombre} ha lanzado el dado y ha sacado {puntos}"
-        if puntos == 1:
-            pregunta, respuesta_correcta = self.responder_pregunta()
-            resultado += f"\n{pregunta}"
-            respuesta_usuario = input("Tu respuesta: ")  # Pedir respuesta al usuario
-            if respuesta_usuario.lower() == respuesta_correcta.lower():
-                resultado += f"\n{jugador.nombre} ha respondido correctamente y mantiene sus puntos."
-            else:
-                jugador.puntos = 0
-                resultado += f"\n{jugador.nombre} ha respondido incorrectamente y pierde todos sus puntos."
-        else:
-            jugador.acumular_puntos(puntos)
-            resultado += f"\n{jugador.nombre} ahora tiene {jugador.get_puntos()} puntos."
-            if jugador.get_puntos() >= self.puntos_ganar:
-                resultado += f"\n{jugador.nombre} ha ganado el juego con {jugador.get_puntos()} puntos!"
-                self.guardar_mejores_puntuaciones(jugador)
-                return resultado, True
-        return resultado, False
-
-    def responder_pregunta(self):
+    def hacer_pregunta(self):
         preguntas = [
             {
                 "pregunta": "¿Cuál de estos animales no es un mamífero?",
-                "opciones": ["a) Ballena", "b) Pingüino", "c) Cocodrilo", "d) Jirafa"],
-                "respuesta": "c"
+                "opciones": ["Ballena", "Pingüino", "Cocodrilo", "Jirafa"],
+                "respuesta": "Pingüino"
             },
             {
                 "pregunta": "¿En qué ciudad se encuentra el Museo del Prado?",
-                "opciones": ["a) Madrid", "b) Barcelona", "c) Sevilla", "d) Valencia"],
-                "respuesta": "a"
+                "opciones": ["Madrid", "Barcelona", "Sevilla", "Valencia"],
+                "respuesta": "Madrid"
             },
             {
                 "pregunta": "¿Cuál es la obra más famosa de William Shakespeare?",
-                "opciones": ["a) Hamlet", "b) Romeo y Julieta", "c) Macbeth", "d) El Rey Lear"],
-                "respuesta": "b"
+                "opciones": ["Hamlet", "Romeo y Julieta", "Macbeth", "El Rey Lear"],
+                "respuesta": "Hamlet"
             },
             {
                 "pregunta": "¿Cuál es la bandera de Colombia?",
-                "opciones": [
-                    "a) Verde, amarillo y azul con una franja roja horizontal en el centro",
-                    "b) Rojo, amarillo y azul con una franja verde horizontal en el centro",
-                    "c) Amarillo, azul y rojo con una franja verde horizontal en el centro",
-                    "d) Azul, amarillo y rojo con una franja verde diagonal"
-                ],
-                "respuesta": "c"
+                "opciones": ["Verde, amarillo y azul con una franja roja horizontal en el centro",
+                             "Rojo, amarillo y azul con una franja verde horizontal en el centro",
+                             "Amarillo, azul y rojo con una franja verde horizontal en el centro",
+                             "Azul, amarillo y rojo con una franja verde diagonal"],
+                "respuesta": "Amarillo, azul y rojo con una franja verde horizontal en el centro"
             },
             {
                 "pregunta": "¿Cuál es el elemento químico con símbolo Au?",
-                "opciones": ["a) Plata", "b) Oro", "c) Cobre", "d) Hierro"],
-                "respuesta": "b"
+                "opciones": ["Plata", "Oro", "Cobre", "Hierro"],
+                "respuesta": "Oro"
             },
             {
                 "pregunta": "¿En qué año se descubrió América?",
-                "opciones": ["a) 1492", "b) 1502", "c) 1602", "d) 1702"],
-                "respuesta": "a"
+                "opciones": ["1492", "1502", "1602", "1702"],
+                "respuesta": "1492"
             },
             {
                 "pregunta": "¿Cuál es el planeta más pequeño del Sistema Solar?",
-                "opciones": ["a) Mercurio", "b) Venus", "c) Tierra", "d) Marte"],
-                "respuesta": "a"
+                "opciones": ["Mercurio", "Venus", "Tierra", "Marte"],
+                "respuesta": "Mercurio"
             },
             {
                 "pregunta": "¿Quién escribió 'Cien años de soledad'?",
-                "opciones": ["a) Gabriel García Márquez", "b) Mario Vargas Llosa", "c) Isabel Allende", "d) Jorge Luis Borges"],
-                "respuesta": "a"
+                "opciones": ["Gabriel García Márquez", "Mario Vargas Llosa", "Isabel Allende", "Jorge Luis Borges"],
+                "respuesta": "Gabriel García Márquez"
             },
             {
                 "pregunta": "¿Cuál es el río más caudaloso del mundo?",
-                "opciones": ["a) Amazonas", "b) Nilo", "c) Yangtze", "d) Misisipi"],
-                "respuesta": "a"
+                "opciones": ["Amazonas", "Nilo", "Yangtsé", "Misisipi"],
+                "respuesta": "Amazonas"
             },
             {
                 "pregunta": "¿De qué está hecho el Sol?",
-                "opciones": ["a) Hidrógeno y helio", "b) Oxígeno y nitrógeno", "c) Carbono y silicio", "d) Hierro y níquel"],
-                "respuesta": "a"
+                "opciones": ["Hidrógeno y helio", "Oxígeno y nitrógeno", "Carbono y silicio", "Hierro y níquel"],
+                "respuesta": "Hidrógeno y helio"
             },
             {
                 "pregunta": "¿Cuál es el río más largo del mundo?",
-                "opciones": ["a) Nilo", "b) Amazonas", "c) Yangtsé", "d) Misisipi"],
-                "respuesta": "b"
+                "opciones": ["Nilo", "Amazonas", "Yangtsé", "Misisipi"],
+                "respuesta": "Nilo"
             },
             {
                 "pregunta": "¿Quién escribió 'El principito'?",
-                "opciones": ["a) Antoine de Saint-Exupéry", "b) J.K. Rowling", "c) Gabriel García Márquez", "d) William Shakespeare"],
-                "respuesta": "a"
+                "opciones": ["Antoine de Saint-Exupéry", "J.K. Rowling", "Gabriel García Márquez",
+                             "William Shakespeare"],
+                "respuesta": "Antoine de Saint-Exupéry"
             },
             {
                 "pregunta": "¿Cuál es el elemento químico más abundante en la corteza terrestre?",
-                "opciones": ["a) Oxígeno", "b) Hierro", "c) Carbono", "d) Silicio"],
-                "respuesta": "a"
+                "opciones": ["Oxígeno", "Hierro", "Carbono", "Silicio"],
+                "respuesta": "Oxígeno"
             },
             {
                 "pregunta": "¿Cuál es la capital de Australia?",
-                "opciones": ["a) Sídney", "b) Canberra", "c) Melbourne", "d) Brisbane"],
-                "respuesta": "b"
+                "opciones": ["Sídney", "Canberra", "Melbourne", "Brisbane"],
+                "respuesta": "Canberra"
             },
             {
                 "pregunta": "¿Quién pintó la Mona Lisa?",
-                "opciones": ["a) Leonardo da Vinci", "b) Pablo Picasso", "c) Vincent van Gogh", "d) Claude Monet"],
-                "respuesta": "a"
+                "opciones": ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Claude Monet"],
+                "respuesta": "Leonardo da Vinci"
             },
             {
                 "pregunta": "¿Cuál es el país más grande del mundo por territorio?",
-                "opciones": ["a) China", "b) Estados Unidos", "c) Rusia", "d) Canadá"],
-                "respuesta": "c"
+                "opciones": ["China", "Estados Unidos", "Rusia", "Canadá"],
+                "respuesta": "Rusia"
             },
             {
                 "pregunta": "¿Quién fue el primer ser humano en viajar al espacio?",
-                "opciones": ["a) Yuri Gagarin", "b) Neil Armstrong", "c) John Glenn", "d) Buzz Aldrin"],
-                "respuesta": "a"
+                "opciones": ["Yuri Gagarin", "Neil Armstrong", "Buzz Aldrin", "Alan Shepard"],
+                "respuesta": "Yuri Gagarin"
             },
             {
                 "pregunta": "¿Cuál es el océano más grande del mundo?",
-                "opciones": ["a) Atlántico", "b) Índico", "c) Pacífico", "d) Ártico"],
-                "respuesta": "c"
+                "opciones": ["Atlántico", "Índico", "Pacífico", "Ártico"],
+                "respuesta": "Pacífico"
             },
             {
-                "pregunta": "¿En qué país se encuentra la Torre Eiffel?",
-                "opciones": ["a) Italia", "b) Francia", "c) España", "d) Alemania"],
-                "respuesta": "b"
+                "pregunta": "¿Quién escribió 'Cien años de soledad'?",
+                "opciones": ["Gabriel García Márquez", "Mario Vargas Llosa", "Isabel Allende", "Julio Cortázar"],
+                "respuesta": "Gabriel García Márquez"
             },
             {
-                "pregunta": "¿Cuál es el continente más grande del mundo?",
-                "opciones": ["a) África", "b) América", "c) Asia", "d) Europa"],
-                "respuesta": "c"
+                "pregunta": "¿Cuál es el metal más abundante en la corteza terrestre?",
+                "opciones": ["Aluminio", "Hierro", "Oro", "Plata"],
+                "respuesta": "Aluminio"
             }
         ]
-        pregunta = random.choice(preguntas)
-        return f"{pregunta['pregunta']}\n" + "\n".join(pregunta['opciones']), pregunta['respuesta']
 
-    def guardar_juego(self):
-        estado = {
-            'jugadores': [{'nombre': jugador.nombre, 'puntos': jugador.puntos} for jugador in self.jugadores],
-            'puntos_ganar': self.puntos_ganar,
-            'min_val_dado': self.min_val_dado,
-            'max_val_dado': self.max_val_dado
-        }
-        with open('juego_guardado.json', 'w') as archivo:
-            json.dump(estado, archivo)
-        return "Juego guardado."
+        return random.choice(preguntas)
 
-    def cargar_juego(self):
-        if os.path.exists('juego_guardado.json'):
-            with open('juego_guardado.json', 'r') as archivo:
-                estado = json.load(archivo)
-            self.jugadores = [JugadorPersonalizado(j['nombre']) for j in estado['jugadores']]
-            for jugador, datos in zip(self.jugadores, estado['jugadores']):
-                jugador.puntos = datos['puntos']
-            self.puntos_ganar = estado['puntos_ganar']
-            self.min_val_dado = estado['min_val_dado']
-            self.max_val_dado = estado['max_val_dado']
-            return "Juego cargado."
-        else:
-            return "No hay ningún juego guardado."
+    def verificar_respuesta(self, pregunta, respuesta):
+        return respuesta == pregunta["respuesta"]
 
-    def guardar_mejores_puntuaciones(self, jugador: Jugador):
-        self.mejores_puntuaciones.append((jugador.nombre, jugador.puntos, len(self.jugadores)))
-        self.mejores_puntuaciones.sort(key=lambda x: x[1], reverse=True)
-        with open('mejores_puntuaciones.json', 'w') as archivo:
-            json.dump(self.mejores_puntuaciones, archivo)
-        return "Mejores puntuaciones actualizadas."
+    def jugar_clasico(self):
+        objetivo = 50
+        return self.jugar(objetivo)
 
-    def mostrar_mejores_puntuaciones(self):
-        if os.path.exists('mejores_puntuaciones.json'):
-            with open('mejores_puntuaciones.json', 'r') as archivo:
-                self.mejores_puntuaciones = json.load(archivo)
-            puntuaciones = ["Mejores puntuaciones:"]
-            for puntuacion in self.mejores_puntuaciones:
-                puntuaciones.append(f"Jugador: {puntuacion[0]}, Puntos: {puntuacion[1]}, Rondas: {puntuacion[2]}")
-            return "\n".join(puntuaciones)
-        else:
-            return "No hay puntuaciones registradas."
+    def jugar_personalizado(self, min_valor_dado, max_valor_dado, puntos_limite):
+        return self.jugar(puntos_limite, min_valor_dado, max_valor_dado)
 
-def mostrar_menu():
-    opciones = [
-        "1. Juego Clásico",
-        "2. Juego Personalizado",
-        "3. Cargar juego",
-        "4. Mostrar mejores puntuaciones",
-        "5. Salir"
-    ]
-    return "\n".join(opciones)
-
-def pedir_numero(mensaje, min_val=1):
-    while True:
-        try:
-            valor = int(input(mensaje))
-            if valor < min_val:
-                print(f"El número debe ser mayor o igual a {min_val}.")
+    def jugar(self, puntos_limite, min_valor_dado=1, max_valor_dado=6):
+        self.rondas += 1
+        for jugador in self.jugadores:
+            dado = self.lanzar_dado(min_valor_dado, max_valor_dado)
+            if dado == 1:
+                if min_valor_dado != 1 or max_valor_dado != 6:
+                    pregunta = self.hacer_pregunta()
+                    return (pregunta, jugador)
+                else:
+                    jugador.puntos = 0
             else:
-                return valor
-        except ValueError:
-            print("Por favor, introduce un número válido.")
-
-def juego_principal():
-    resultados = []
-    while True:
-        menu = mostrar_menu()
-        print(menu)
-        opcion = input("Selecciona una opción: ")
-        if opcion == '1':
-            num_jugadores = pedir_numero("Introduce el número de jugadores: ")
-            nombres_jugadores = [input(f"Introduce el nombre del jugador {i + 1}: ") for i in range(num_jugadores)]
-            juego = Juego()
-            juego.iniciar_juego(num_jugadores, nombres_jugadores)
-            resultados.extend(juego.jugar())
-            print("Resultados finales:")
-            for nombre, puntos in juego.terminar_juego():
-                print(f"{nombre}: {puntos} puntos")
-        elif opcion == '2':
-            num_jugadores = pedir_numero("Introduce el número de jugadores: ")
-            nombres_jugadores = [input(f"Introduce el nombre del jugador {i + 1}: ") for i in range(num_jugadores)]
-            puntos_ganar = pedir_numero("Introduce el puntaje que se debe alcanzar para ganar (25-100): ", 25)
-            min_val_dado = pedir_numero("Introduce el valor mínimo del dado (1-3): ", 1)
-            max_val_dado = pedir_numero("Introduce el valor máximo del dado (4-25): ", 4)
-            juego = JuegoPersonalizado()
-            juego.iniciar_juego(num_jugadores, nombres_jugadores, puntos_ganar, min_val_dado, max_val_dado)
-            resultados.extend(juego.jugar())
-            print("Resultados finales:")
-            for nombre, puntos in juego.terminar_juego():
-                print(f"{nombre}: {puntos} puntos")
-        elif opcion == '3':
-            juego = JuegoPersonalizado()
-            cargar_resultado = juego.cargar_juego()
-            print(cargar_resultado)
-            if "cargado" in cargar_resultado:
-                resultados.extend(juego.jugar())
-        elif opcion == '4':
-            juego = JuegoPersonalizado()
-            mejores_puntuaciones = juego.mostrar_mejores_puntuaciones()
-            print(mejores_puntuaciones)
-        elif opcion == '5':
-            break
-        else:
-            print("Opción no válida. Inténtalo de nuevo.")
-    return resultados
-
-if __name__ == "__main__":
-    juego_principal()
+                jugador.puntos += dado
+            if jugador.puntos >= puntos_limite:
+                return f"{jugador.nombre} ha ganado en {self.rondas} rondas!"
+        return None
